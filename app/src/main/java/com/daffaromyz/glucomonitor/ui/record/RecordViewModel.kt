@@ -1,7 +1,5 @@
-package com.daffaromyz.glucomonitor.ui.dashboard
+package com.daffaromyz.glucomonitor.ui.record
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -14,8 +12,10 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
+import kotlinx.coroutines.flow.StateFlow
 
-class DashboardViewModel(private val repository: GlucoseRepository) : ViewModel() {
+class RecordViewModel(private val repository: GlucoseRepository) : ViewModel() {
+
 
     val homeUiState = repository.getAllStream().map { HomeUiState(it) }
         .stateIn(
@@ -23,14 +23,13 @@ class DashboardViewModel(private val repository: GlucoseRepository) : ViewModel(
             started = SharingStarted.WhileSubscribed(TIMEOUT_MILLIS),
             initialValue = HomeUiState()
         )
-
     companion object {
         private const val TIMEOUT_MILLIS = 5_000L
         val Factory : ViewModelProvider.Factory = viewModelFactory {
             initializer {
                 val application = (this[APPLICATION_KEY] as GlucoseApplication)
                 val glucoseRepository = application.container.glucoseRepository
-                DashboardViewModel(repository = glucoseRepository)
+                RecordViewModel(repository = glucoseRepository)
             }
         }
     }

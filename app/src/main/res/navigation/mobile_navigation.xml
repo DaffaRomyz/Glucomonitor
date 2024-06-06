@@ -6,6 +6,12 @@
     app:startDestination="@+id/navigation_dashboard">
 
     <fragment
+        android:id="@+id/navigation_record"
+        android:name="com.daffaromyz.glucomonitor.ui.record.RecordFragment"
+        android:label="@string/title_record"
+        tools:layout="@layout/fragment_record" />
+
+    <fragment
         android:id="@+id/navigation_dashboard"
         android:name="com.daffaromyz.glucomonitor.ui.dashboard.DashboardFragment"
         android:label="@string/title_dashboard"

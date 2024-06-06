@@ -17,11 +17,13 @@ import android.graphics.Matrix
 import android.widget.Toast
 import androidx.camera.core.AspectRatio
 import androidx.camera.core.ImageProxy
+import androidx.lifecycle.lifecycleScope
 import com.daffaromyz.glucomonitor.BoundingBox
 import com.daffaromyz.glucomonitor.DigitDetector
 import com.daffaromyz.glucomonitor.database.Glucose
 import com.daffaromyz.glucomonitor.database.GlucoseDao
 import com.daffaromyz.glucomonitor.database.GlucoseDatabase
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 //import com.daffaromyz.glucomonitor.ModelHelper
 import java.util.concurrent.ExecutorService
@@ -65,7 +67,6 @@ class CameraFragment : Fragment(), DigitDetector.DetectorListener {
         _binding = null
         cameraExecutor.shutdown()
         digitDetector?.close()
-        db.close()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -84,15 +85,15 @@ class CameraFragment : Fragment(), DigitDetector.DetectorListener {
 
     private fun takeValue() {
         if (resultValue.toIntOrNull() is Int) {
-            runBlocking {
-                dao.insert(Glucose(0,2, resultValue.toInt()))
+            lifecycleScope.launch {
+                dao.insert(Glucose(id = 0, value = resultValue.toInt()))
                 Log.i("INSERT", "mg $resultValue")
             }
             Toast.makeText(this.requireContext(), "Reading Successfully Added", Toast.LENGTH_SHORT).show()
         } else if (resultValue.toDoubleOrNull() is Double) {
             val glucoseValue = resultValue.toDouble() * 18.018
-            runBlocking {
-                dao.insert(Glucose(0,2, glucoseValue.toInt()))
+            lifecycleScope.launch {
+                dao.insert(Glucose(id = 0, value = glucoseValue.toInt()))
                 Log.i("INSERT", "mmol $resultValue")
             }
             Toast.makeText(this.requireContext(), "Reading Successfully Added", Toast.LENGTH_SHORT).show()

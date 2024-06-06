@@ -10,11 +10,13 @@ import android.widget.Toast
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import com.daffaromyz.glucomonitor.database.Glucose
 import com.daffaromyz.glucomonitor.database.GlucoseDao
 import com.daffaromyz.glucomonitor.database.GlucoseDatabase
 import com.daffaromyz.glucomonitor.databinding.FragmentAddBinding
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 class AddFragment : Fragment() {
@@ -68,8 +70,8 @@ class AddFragment : Fragment() {
             val glucoseText = binding.textValueInput.text.toString()
             if (glucoseText.toIntOrNull() is Int) {
                 if (isUnitMg == true) {
-                    runBlocking {
-                        dao.insert(Glucose(0,2, glucoseText.toInt()))
+                    lifecycleScope.launch {
+                        dao.insert(Glucose(id = 0,value = glucoseText.toInt()))
                         Log.i("INSERT", "mg $glucoseText")
                     }
                     Toast.makeText(this.requireContext(), "Reading Successfully Added", Toast.LENGTH_SHORT).show()
@@ -79,8 +81,8 @@ class AddFragment : Fragment() {
             } else if (glucoseText.toDoubleOrNull() is Double) {
                 if (isUnitMg == false) {
                     val glucoseValue = glucoseText.toDouble() * 18.018
-                    runBlocking {
-                        dao.insert(Glucose(0,2, glucoseValue.toInt()))
+                    lifecycleScope.launch {
+                        dao.insert(Glucose(id = 0,value = glucoseValue.toInt()))
                         Log.i("INSERT", "mmol $glucoseText")
                     }
                     Toast.makeText(this.requireContext(), "Reading Successfully Added", Toast.LENGTH_SHORT).show()
@@ -111,6 +113,5 @@ class AddFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-        db.close()
     }
 }

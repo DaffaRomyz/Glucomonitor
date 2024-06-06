@@ -3,6 +3,7 @@
     <string name="title_camera">Camera</string>
     <string name="title_dashboard">Dashboard</string>
     <string name="title_add">Add</string>
+    <string name="title_record">Records</string>
     <string name="take_value">Save Value</string>
     <string name="init_value">000</string>
     <string name="init_time">000ms</string>
@@ -10,4 +11,9 @@
     <string name="glucose_unit">Glucose Unit</string>
     <string name="unit_mg">mg/dL</string>
     <string name="unit_mmol">mmol/L</string>
+    <string name="delete">Delete</string>
+    <string name="edit">edit</string>
+    <string name="longtext">LOOOOOOOOOOOOOOOOONG TEXT</string>
+    <string name="datetime">Datetime</string>
+    <string name="datetime_init_value">YYYY/MM/DD HH:MM:SS</string>
 </resources>
