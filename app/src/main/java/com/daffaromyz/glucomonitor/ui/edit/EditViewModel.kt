@@ -8,7 +8,6 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.daffaromyz.glucomonitor.GlucoseApplication
 import com.daffaromyz.glucomonitor.database.Glucose
 import com.daffaromyz.glucomonitor.database.GlucoseRepository
-import com.daffaromyz.glucomonitor.ui.dashboard.DashboardViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -28,7 +27,7 @@ class EditViewModel(private val repository: GlucoseRepository) : ViewModel() {
             initializer {
                 val application = (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as GlucoseApplication)
                 val glucoseRepository = application.container.glucoseRepository
-                DashboardViewModel(repository = glucoseRepository)
+                EditViewModel(repository = glucoseRepository)
             }
         }
     }

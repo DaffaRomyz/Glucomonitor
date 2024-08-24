@@ -23,6 +23,7 @@ room = "2.6.0"
 mpAndroidChart = "3.1.0"
 legacySupportV4 = "1.0.0"
 fragmentKtx = "1.5.6"
+safeArgs = "2.7.7"
 
 [libraries]
 tflite = { group = "org.tensorflow", name = "tensorflow-lite", version.ref = "tfLite"}
@@ -58,6 +59,7 @@ androidx-legacy-support-v4 = { group = "androidx.legacy", name = "legacy-support
 androidx-fragment-ktx = { group = "androidx.fragment", name = "fragment-ktx", version.ref = "fragmentKtx" }
 
 [plugins]
+nav-safe-args = {id = "androidx.navigation.safeargs.kotlin", version.ref = "safeArgs"}
 ksp = {id = "com.google.devtools.ksp", version.ref = "ksp"}
 android-application = { id = "com.android.application", version.ref = "agp" }
 jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }

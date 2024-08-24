@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.FragmentManager
@@ -13,6 +14,8 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import androidx.navigation.Navigation
+import androidx.navigation.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.daffaromyz.glucomonitor.R
@@ -76,11 +79,13 @@ class RecordFragment : Fragment() {
                         }
                     })
 
-//                    glucoseAdapter.setEditOnClickListener(object :
-//                        GlucoseAdapter.OnClickListener {
-//                        override fun onClick(position: Int, model: Glucose) {
-//                        }
-//                    })
+                    glucoseAdapter.setEditOnClickListener(object :
+                        GlucoseAdapter.OnClickListener {
+                        override fun onClick(position: Int, model: Glucose) {
+                            val bundle = bundleOf("glucoseid" to model.id)
+                            view?.findNavController()?.navigate(R.id.action_navigate_to_edit, bundle)
+                        }
+                    })
                 }
             }
         }
