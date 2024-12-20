@@ -32,7 +32,7 @@ class MainActivity : AppCompatActivity() {
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         val appBarConfiguration = AppBarConfiguration(setOf(
-            R.id.navigation_record, R.id.navigation_dashboard, R.id.navigation_camera, R.id.navigation_add))
+            R.id.navigation_dashboard, R.id.navigation_camera, R.id.navigation_add))
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
 
@@ -76,6 +76,11 @@ class MainActivity : AppCompatActivity() {
             ).apply {
                 if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
                     add(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                }
+                if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.TIRAMISU) {
+                    add(Manifest.permission.READ_EXTERNAL_STORAGE)
+                } else {
+                    add(Manifest.permission.READ_MEDIA_IMAGES)
                 }
             }.toTypedArray()
     }

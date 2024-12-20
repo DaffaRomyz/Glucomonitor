@@ -12,14 +12,19 @@
         tools:layout="@layout/fragment_record" >
         <action
             android:id="@+id/action_navigate_to_edit"
-            app:destination="@id/navigation_edit" />
+            app:destination="@id/navigation_edit"
+            app:popUpTo="@id/navigation_record" />
     </fragment>
 
     <fragment
         android:id="@+id/navigation_dashboard"
         android:name="com.daffaromyz.glucomonitor.ui.dashboard.DashboardFragment"
         android:label="@string/title_dashboard"
-        tools:layout="@layout/fragment_dashboard" />
+        tools:layout="@layout/fragment_dashboard" >
+        <action
+            android:id="@+id/action_navigation_dashboard_to_navigation_record"
+            app:destination="@id/navigation_record" />
+    </fragment>
 
     <fragment
         android:id="@+id/navigation_camera"
@@ -41,5 +46,8 @@
         <argument
             android:name="glucoseid"
             app:argType="integer" />
+        <action
+            android:id="@+id/action_navigate_to_record"
+            app:destination="@id/navigation_record" />
     </fragment>
 </navigation>

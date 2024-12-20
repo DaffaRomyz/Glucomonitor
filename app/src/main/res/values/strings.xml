@@ -16,4 +16,6 @@
     <string name="longtext">LOOOOOOOOOOOOOOOOONG TEXT</string>
     <string name="datetime">Datetime</string>
     <string name="datetime_init_value">YYYY/MM/DD HH:MM:SS</string>
+    <string name="open_gallery">Open Gallery</string>
+    <string name="gallery_view_decs">Image from gallery</string>
 </resources>

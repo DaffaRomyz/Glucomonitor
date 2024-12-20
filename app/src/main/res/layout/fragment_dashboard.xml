@@ -10,5 +10,6 @@
         android:id="@+id/chart"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        app:layout_constraintTop_toTopOf="parent"
         android:layout_marginBottom="100dp"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

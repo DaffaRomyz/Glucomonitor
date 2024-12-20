@@ -2,6 +2,7 @@ package com.daffaromyz.glucomonitor.ui.record
 
 import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -82,6 +83,7 @@ class RecordFragment : Fragment() {
                     glucoseAdapter.setEditOnClickListener(object :
                         GlucoseAdapter.OnClickListener {
                         override fun onClick(position: Int, model: Glucose) {
+                            Log.i("EDIT CLICKED", model.id.toString())
                             val bundle = bundleOf("glucoseid" to model.id)
                             view?.findNavController()?.navigate(R.id.action_navigate_to_edit, bundle)
                         }

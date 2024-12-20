@@ -6,6 +6,18 @@
     android:layout_height="match_parent"
     tools:context=".ui.camera.CameraFragment">
 
+    <Button
+        android:id="@+id/gallery_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:drawableLeft="@drawable/baseline_crop_original_24"
+        android:text="@string/open_gallery"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+
+        />
+
     <androidx.camera.view.PreviewView
         android:id="@+id/view_finder"
         android:layout_width="0dp"
@@ -13,7 +25,21 @@
         app:layout_constraintDimensionRatio="3:4"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/gallery_button"
+        app:layout_constraintVertical_bias="0.5"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:scaleType="fillStart" />
+
+    <ImageView
+        android:id="@+id/gallery_view"
+        android:contentDescription="@string/gallery_view_decs"
+        android:visibility="gone"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintDimensionRatio="3:4"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/view_finder"
         app:layout_constraintVertical_bias="0.5"
         app:layout_constraintHorizontal_bias="0.5"
         app:scaleType="fillStart" />
@@ -27,7 +53,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/gallery_button"/>
 
     <TextView
         android:id="@+id/value_text"
@@ -39,7 +65,7 @@
         android:padding="10dp"
         app:layout_constraintEnd_toStartOf="@id/take_value_button"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/view_finder"
+        app:layout_constraintTop_toBottomOf="@id/gallery_view"
         android:textSize="30sp"/>
 
     <TextView
@@ -52,7 +78,7 @@
         android:padding="10dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/take_value_button"
-        app:layout_constraintTop_toBottomOf="@id/view_finder"
+        app:layout_constraintTop_toBottomOf="@id/gallery_view"
         android:textSize="30sp"/>
 
     <Button
@@ -60,7 +86,7 @@
         android:layout_width="100dp"
         android:layout_height="80dp"
         android:text="@string/take_value"
-        app:layout_constraintTop_toBottomOf="@id/view_finder"
+        app:layout_constraintTop_toBottomOf="@id/gallery_view"
         app:layout_constraintEnd_toStartOf="@id/inference_time_text"
         app:layout_constraintStart_toEndOf="@id/value_text" />
 </androidx.constraintlayout.widget.ConstraintLayout>

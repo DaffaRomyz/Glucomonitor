@@ -1,39 +1,36 @@
 package com.daffaromyz.glucomonitor
 
 import android.content.Context
-import android.content.res.AssetManager
 import android.graphics.Bitmap
+import android.os.Environment
 import android.os.SystemClock
 import android.util.Log
-import com.google.android.gms.tasks.Task
-import com.google.android.gms.tasks.TaskCompletionSource
+import android.widget.Toast
+import androidx.core.graphics.get
 import org.tensorflow.lite.DataType
 import org.tensorflow.lite.Interpreter
 import org.tensorflow.lite.gpu.CompatibilityList
 import org.tensorflow.lite.gpu.GpuDelegate
 import org.tensorflow.lite.support.common.FileUtil
 import org.tensorflow.lite.support.common.ops.CastOp
+import org.tensorflow.lite.support.common.ops.DequantizeOp
 import org.tensorflow.lite.support.common.ops.NormalizeOp
+import org.tensorflow.lite.support.common.ops.QuantizeOp
 import org.tensorflow.lite.support.image.ImageProcessor
 import org.tensorflow.lite.support.image.TensorImage
 import org.tensorflow.lite.support.tensorbuffer.TensorBuffer
-import java.io.BufferedReader
-import java.io.FileInputStream
+import java.io.File
+import java.io.FileOutputStream
+import java.io.FileWriter
 import java.io.IOException
-import java.io.InputStream
-import java.io.InputStreamReader
-import java.nio.ByteBuffer
-import java.nio.ByteOrder
-import java.nio.channels.FileChannel
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
+
 
 class DigitDetector(
     private val context: Context,
     private val detectorListener: DetectorListener
 ) {
     private var interpreter: Interpreter? = null
-    private var modelName = "yolov8s_float16.tflite"
+    private var modelName = "yolo11s_float16.tflite"
     private var labels = mutableListOf<String>()
 
     private val imageProcessor = ImageProcessor.Builder()
@@ -47,6 +44,8 @@ class DigitDetector(
     private var numChannel: Int = 0
     private var numElements: Int = 0
 
+    private var stop = false
+    private var i = 0
     fun setup(isGpu: Boolean = true) {
 
         if (interpreter != null) {
@@ -60,13 +59,16 @@ class DigitDetector(
                 if(compatList.isDelegateSupportedOnThisDevice){
                     val delegateOptions = compatList.bestOptionsForThisDevice
                     this.addDelegate(GpuDelegate(delegateOptions))
+                    Log.i("DIGIT DETECTOR", "GPU delegate")
                 } else {
                     this.setNumThreads(4)
+                    Log.i("DIGIT DETECTOR", "GPU not support")
                 }
             }
         } else {
             Interpreter.Options().apply{
                 this.setNumThreads(4)
+                Log.i("DIGIT DETECTOR", "CPU delegate")
             }
         }
 
@@ -86,53 +88,137 @@ class DigitDetector(
         labels = mutableListOf<String>(",","0", "1", "2","3","4","5","6","7","8","9")
     }
 
-    fun detect(frame: Bitmap) {
-        interpreter ?: return
-        if (inputImageWidth == 0) return
-        if (inputImageHeight == 0) return
-        if (numChannel == 0) return
-        if (numElements == 0) return
+    fun detect(frame: Bitmap, stopafter : Boolean, filename : String) {
 
+        if (!stop) {
+            interpreter ?: return
+            if (inputImageWidth == 0) return
+            if (inputImageHeight == 0) return
+            if (numChannel == 0) return
+            if (numElements == 0) return
 
+            // resize bitmap to 640x640
+            val resizedBitmap = Bitmap.createScaledBitmap(frame, inputImageWidth, inputImageHeight, false)
 
-        val resizedBitmap = Bitmap.createScaledBitmap(frame, inputImageWidth, inputImageHeight, false)
+            // save bitmap for testing
+//            i += 1
+//            val filename = StringBuilder()
+//            filename.append(context.getDir("GlucoMonitor", Context.MODE_PRIVATE))
+//            filename.append("/GlucoMonitor_")
+//            filename.append(i.toString())
+//            filename.append(".png")
+//            val file = File(filename.toString())
+//            val fileOutputStream = FileOutputStream(file)
+//            resizedBitmap.compress(Bitmap.CompressFormat.PNG, 100, fileOutputStream);
+//            fileOutputStream.close()
 
-        val tensorImage = TensorImage(INPUT_IMAGE_TYPE)
-        tensorImage.load(resizedBitmap)
-        val processedImage = imageProcessor.process(tensorImage)
-        val imageBuffer = processedImage.buffer
+//            Log.i("DIGIT DETECTOR", filename.toString())
+//            Log.i("DIGIT DETECTOR", stopafter.toString())
+//            Log.i("DIGIT DETECTOR", resizedBitmap.width.toString())
+//            Log.i("DIGIT DETECTOR", resizedBitmap.height.toString())
 
-        val output = TensorBuffer.createFixedSize(intArrayOf(1, numChannel, numElements), OUTPUT_IMAGE_TYPE)
+            // Convert image to Tensor Image
+            var tensorImage = TensorImage(INPUT_IMAGE_TYPE)
+            tensorImage.load(resizedBitmap)
 
-        var inferenceTime = SystemClock.uptimeMillis()
-        interpreter?.run(imageBuffer, output.buffer)
-        inferenceTime = SystemClock.uptimeMillis() - inferenceTime
+            // Normalize image if model input float
+            if (INPUT_IMAGE_TYPE == DataType.FLOAT32) {
+                tensorImage = imageProcessor.process(tensorImage)
+            }
 
-        val bestBoxes = bestBox(output.floatArray)
+            // Init Output Buffer
+            var output = TensorBuffer.createFixedSize(intArrayOf(1, numChannel, numElements), OUTPUT_IMAGE_TYPE)
 
+            // Inference
+            var inferenceTime = SystemClock.uptimeMillis()
+            interpreter?.run(tensorImage.buffer, output.buffer)
+            inferenceTime = SystemClock.uptimeMillis() - inferenceTime
 
-        if (bestBoxes == null) {
-            detectorListener.onEmptyDetect()
-            return
+            // Convert to float if model output int
+//            Log.i("MODEL OUTPUT DATATYPE1", output.dataType.toString())
+            if (OUTPUT_IMAGE_TYPE == DataType.UINT8) {
+                output = QuantizeOp(0F, 255F).apply(output)
+            }
+//            Log.i("MODEL OUTPUT DATATYPE2", output_casted.dataType.toString())
+
+            // Check output
+//            val array_float = output.floatArray
+//            Log.i("MODEL OUTPUT FLOAT1", "${array_float[0]} ${array_float[numElements]} ${array_float[numElements*2]} ${array_float[numElements*3]} ${array_float[numElements*4]} ${array_float[numElements*5]} ${array_float[numElements*6]} ${array_float[numElements*7]} ${array_float[numElements*8]} ${array_float[numElements*9]} ${array_float[numElements*10]} ${array_float[numElements*11]} ${array_float[numElements*12]} ${array_float[numElements*13]} ${array_float[numElements*14]}")
+//
+//            val array_casted = output_casted.floatArray
+//            Log.i("MODEL OUTPUT FLOAT2", "${array_casted[0]} ${array_casted[numElements]} ${array_casted[numElements*2]} ${array_casted[numElements*3]} ${array_casted[numElements*4]} ${array_casted[numElements*5]} ${array_casted[numElements*6]} ${array_casted[numElements*7]} ${array_casted[numElements*8]} ${array_casted[numElements*9]} ${array_casted[numElements*10]} ${array_casted[numElements*11]} ${array_casted[numElements*12]} ${array_casted[numElements*13]} ${array_casted[numElements*14]}")
+
+            // Filter Confidence & NMS
+            val bestBoxes = bestBox(output.floatArray)
+
+            // Return if empty
+            if (bestBoxes == null) {
+                detectorListener.onEmptyDetect()
+                return
+            }
+
+            // Sort boxes from left to right
+            val centerComparator = Comparator { box1: BoundingBox, box2: BoundingBox -> ((box1.cx - box2.cx) * 100).toInt() }
+            val orderedBoxes = bestBoxes.sortedWith(centerComparator)
+
+            // Set combined glucose value
+            val result  = StringBuffer()
+            Log.i("BOUNDBOX VALUE", filename)
+            for (box in orderedBoxes) {
+                Log.i("BOUNDBOX DESCR", "CLS = ${box.clsName} CX = ${box.cx} CY = ${box.cy} W = ${box.w} H = ${box.h}")
+                Log.i("BOUNDBOX VALUE", "${box.clsName} ${box.cx} ${box.cy} ${box.w} ${box.h}")
+                result.append(box.clsName)
+            }
+            Log.i("BOUNDBOX VALUE", "END")
+            // Create txt for eval
+//            if (filename != "") {
+//                try {
+//                    val root = File(Environment.getExternalStorageDirectory(), "Notes")
+//                    if (!root.exists()) {
+//                        root.mkdirs()
+//                    }
+//                    val gpxfile = File(root, "$filename.txt")
+//                    val writer = FileWriter(gpxfile)
+//                    for (box in orderedBoxes) {
+//                        writer.append(box.clsName)
+//                        writer.append(" ")
+//                        writer.append(box.cx.toString())
+//                        writer.append(" ")
+//                        writer.append(box.cy.toString())
+//                        writer.append(" ")
+//                        writer.append(box.w.toString())
+//                        writer.append(" ")
+//                        writer.append(box.h.toString())
+//                        writer.append("\n")
+//                    }
+//                    writer.flush()
+//                    writer.close()
+//                    Toast.makeText(context, "Saved", Toast.LENGTH_SHORT).show()
+//                    Log.i("TEXT SAVED", "txt saved")
+//                } catch (e: IOException) {
+//                    Log.i("TEXT SAVED", "txt not saved")
+//                    e.printStackTrace()
+//                }
+//            }
+
+            // Return box, value, time
+            Log.i("INFERENCE", "Result = $result Inference Time = $inferenceTime")
+            detectorListener.onDetect(bestBoxes, result.toString(), inferenceTime)
         }
 
-        val centerComparator = Comparator { box1: BoundingBox, box2: BoundingBox -> ((box1.cx - box2.cx) * 100).toInt() }
-        val orderedBoxes = bestBoxes.sortedWith(centerComparator)
-
-        var result  = StringBuffer()
-        for (box in orderedBoxes) {
-            result.append(box.clsName)
+        if (stopafter) {
+            stop = true
         }
-
-        Log.i("INFERENCE", "Result = $result Inference Time = $inferenceTime")
-        detectorListener.onDetect(bestBoxes, result.toString(), inferenceTime)
     }
 
     private fun bestBox(array: FloatArray) : List<BoundingBox>? {
+        // array is arranged as cx * numelement, cy * numelement, w * numelement, h * numelement
+        // the rest is conf for each possible class
 
         val boundingBoxes = mutableListOf<BoundingBox>()
 
         for (c in 0 until numElements) {
+            // find class of the current box, class = best conf
             var maxConf = CONFIDENCE_THRESHOLD
             var maxIdx = -1
             var j = 4
@@ -146,6 +232,7 @@ class DigitDetector(
                 arrayIdx += numElements
             }
 
+            // Add bounding box
             if (maxConf > CONFIDENCE_THRESHOLD) {
                 val clsName = labels[maxIdx]
                 val cx = array[c] // 0
@@ -171,6 +258,7 @@ class DigitDetector(
             }
         }
 
+//        Log.i("DIGIT DETECTOR", boundingBoxes.size.toString())
         if (boundingBoxes.isEmpty()) return null
 
         return applyNMS(boundingBoxes)
@@ -180,6 +268,7 @@ class DigitDetector(
         val sortedBoxes = boxes.sortedByDescending { it.cnf }.toMutableList()
         val selectedBoxes = mutableListOf<BoundingBox>()
 
+        // compare each boxes, if IOU >= threshold keep only one
         while(sortedBoxes.isNotEmpty()) {
             val first = sortedBoxes.first()
             selectedBoxes.add(first)
@@ -195,6 +284,7 @@ class DigitDetector(
             }
         }
 
+//        Log.i("DIGIT DETECTOR", selectedBoxes.size.toString())
         return selectedBoxes
     }
 
@@ -211,7 +301,7 @@ class DigitDetector(
 
     fun close() {
         interpreter?.close()
-        interpreter = null
+//        interpreter = null
     }
 
     interface DetectorListener {

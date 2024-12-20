@@ -24,12 +24,14 @@ class GlucoseAdapter(private val dataSet: List<Glucose>)
         val textValue: TextView
         val textClass: TextView
         val deleteButton : MaterialButton
+        val editButton : MaterialButton
 
         init {
             textDatetime = view.findViewById(R.id.record_datetime)
             textValue = view.findViewById(R.id.record_value)
             textClass = view.findViewById(R.id.record_class)
             deleteButton = view.findViewById(R.id.delete_button)
+            editButton = view.findViewById(R.id.edit_button)
         }
 
     }
@@ -70,6 +72,12 @@ class GlucoseAdapter(private val dataSet: List<Glucose>)
         viewHolder.deleteButton.setOnClickListener {
             if (deleteOnClickListener != null) {
                 deleteOnClickListener!!.onClick(position, dataSet[position])
+            }
+        }
+
+        viewHolder.editButton.setOnClickListener {
+            if (editOnClickListener != null) {
+                editOnClickListener!!.onClick(position, dataSet[position])
             }
         }
     }
