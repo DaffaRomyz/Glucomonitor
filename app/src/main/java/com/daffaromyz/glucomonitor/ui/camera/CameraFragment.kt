@@ -126,7 +126,7 @@ class CameraFragment : Fragment(), DigitDetector.DetectorListener {
         }
         // unit is mmol
         else if (resultValue.toDoubleOrNull() is Double) {
-            val glucoseValue = resultValue.toDouble() * 18.018
+            val glucoseValue = resultValue.toDouble() * 18.0156
             lifecycleScope.launch {
                 dao.insert(Glucose(id = 0, value = glucoseValue.toInt()))
                 Log.i("INSERT", "mmol $resultValue")

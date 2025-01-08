@@ -114,7 +114,7 @@ class EditFragment : Fragment() {
                 }
             } else if (glucoseText.toDoubleOrNull() is Double) { // mmol is float
                 if (isUnitMg == false) {
-                    val glucoseValue = glucoseText.toDouble() * 18.018
+                    val glucoseValue = glucoseText.toDouble() * 18.0156
                     lifecycleScope.launch {
                         dao.update(Glucose(id = glucoseid, datetime = dateText, value = glucoseText.toInt()))
                         Log.i("INSERT", "mmol $glucoseText")

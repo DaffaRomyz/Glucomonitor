@@ -30,7 +30,7 @@ class DigitDetector(
     private val detectorListener: DetectorListener
 ) {
     private var interpreter: Interpreter? = null
-    private var modelName = "yolo11s_float16.tflite"
+    private var modelName = "yolo11s_uint8.tflite"
     private var labels = mutableListOf<String>()
 
     private val imageProcessor = ImageProcessor.Builder()
@@ -319,8 +319,8 @@ class DigitDetector(
 
         private const val INPUT_MEAN = 0f
         private const val INPUT_STANDARD_DEVIATION = 255f
-        private val INPUT_IMAGE_TYPE = DataType.FLOAT32
-        private val OUTPUT_IMAGE_TYPE = DataType.FLOAT32
+        private val INPUT_IMAGE_TYPE = DataType.UINT8
+        private val OUTPUT_IMAGE_TYPE = DataType.UINT8
         private const val CONFIDENCE_THRESHOLD = 0.3F
         private const val IOU_THRESHOLD = 0.5F
     }

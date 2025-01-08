@@ -18,4 +18,13 @@
     <string name="datetime_init_value">YYYY/MM/DD HH:MM:SS</string>
     <string name="open_gallery">Open Gallery</string>
     <string name="gallery_view_decs">Image from gallery</string>
+    <string name="average_week">Avg (7 Days)</string>
+    <string name="average_month">Avg (Month)</string>
+    <string name="average_all">Avg (All)</string>
+    <string name="chart">Chart</string>
+    <string-array name="chart_array">
+        <item>Bar</item>
+        <item>Line</item>
+        <item>Pie</item>
+    </string-array>
 </resources>
