@@ -354,7 +354,7 @@ class CameraFragment : Fragment(), DigitDetector.DetectorListener {
     }
 
     override fun onDetect(boundingBoxes: List<BoundingBox>, value: String, inferenceTime: Long) {
-        resultValue = value
+        resultValue = value.replace(",", ".")
         activity?.runOnUiThread {
             binding.valueText.text = value
             binding.inferenceTimeText.text = inferenceTime.toString() + "ms"
